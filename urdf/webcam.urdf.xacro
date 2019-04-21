@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+<robot name="webcam" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Lidar sensors -->
+  <xacro:property name="webcam_size" value="0.050" /> <!-- in m -->
+  <xacro:property name="webcam_mass" value="0.160" /> <!-- in kg-->
+
+  <xacro:macro name="webcam" params="sub parent transX transY transZ">
+    <!-- sub: l,r 0,1,2,3 etc -->
+    <!-- parent: parent link name -->
+    <!-- transX transY transZ: xyz position -->
+
+    <link name="webcam_${sub}">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <box size="${webcam_size} ${webcam_size} ${webcam_size}" />
+        </geometry>
+        <material name="Green" />
+      </visual>
+    </link>
+
+    <joint name="webcam_${sub}_joint" type="fixed">
+      <origin xyz="${transX} ${transY} ${transZ}" rpy="0 0 0" />
+      <parent link="${parent}"/>
+      <child link="webcam_${sub}"/>
+    </joint>
+
+    <gazebo reference="webcam_${sub}">
+      <material>Gazebo/Green</material>
+      <visualize>true</visualize>
+      <turnGravityOff>false</turnGravityOff>
+
+      <sensor type="camera" name="webcam_${sub}_camera">
+        <update_rate>10.0</update_rate>
+        <camera name="webcam_${sub}_camera">
+          <pose>${webcam_size/2} 0 0 0 0 0}</pose>
+          <horizontal_fov>1.3962634</horizontal_fov>
+          <image>
+            <width>800</width>
+            <height>600</height>
+            <format>R8G8B8</format>
+          </image>
+          <clip>
+            <near>0.02</near>
+            <far>300</far>
+          </clip>
+          <noise>
+            <type>gaussian</type>
+            <mean>0.0</mean>
+            <stddev>0.007</stddev>
+          </noise>
+        </camera>
+
+        <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+          <alwaysOn>true</alwaysOn>
+          <updateRate>0.0</updateRate>
+          <cameraName>webcam_${sub}_camera</cameraName>
+          <imageTopicName>image_raw</imageTopicName>
+          <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+          <frameName>webcam_${sub}</frameName>
+          <hackBaseline>0.0</hackBaseline>
+          <distortionK1>0.0</distortionK1>
+          <distortionK2>0.0</distortionK2>
+          <distortionK3>0.0</distortionK3>
+          <distortionT1>0.0</distortionT1>
+          <distortionT2>0.0</distortionT2>
+        </plugin>
+      </sensor>
+
+    </gazebo>
+
+  </xacro:macro>
+</robot>
